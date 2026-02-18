@@ -98,22 +98,97 @@ completion_time = closedDate - creationDate
 
 ---
 
+## Authentication & Setup
+
+### Personal Access Token (PAT) for ADO APIs
+
+The script requires authentication to access Azure DevOps REST APIs. This is accomplished using a **Personal Access Token (PAT)**, which is a secure, credential-free method for programmatic access to ADO resources.
+
+#### Creating a PAT
+
+1. Navigate to your Azure DevOps organization: `https://dev.azure.com/{org}`
+2. Click **User Settings** (icon in the top-right corner)
+3. Select **Personal access tokens**
+4. Click **+ New Token**
+5. Configure the token:
+   - **Name:** Choose a descriptive name (e.g., `PR-KPI-Generator`)
+   - **Organization:** Select the organization to grant access to
+   - **Expiration:** Set an appropriate expiration period
+   - **Scopes:** Grant the following scopes:
+     - `Code (Read)` – Required to read pull requests and threads
+
+6. Click **Create** and copy the generated token immediately (you cannot retrieve it again)
+
+#### Storing the PAT as an Environment Variable
+
+To avoid hardcoding credentials in your scripts or command line, store the PAT as an environment variable:
+
+**On Windows (PowerShell):**
+```powershell
+$env:ADO_PAT = "your-pat-token-here"
+```
+
+**On Windows (Command Prompt, persistent):**
+```cmd
+setx ADO_PAT "your-pat-token-here"
+```
+
+**On macOS/Linux (temporary):**
+```bash
+export ADO_PAT="your-pat-token-here"
+```
+
+**On macOS/Linux (persistent, add to ~/.bashrc or ~/.zshrc):**
+```bash
+echo 'export ADO_PAT="your-pat-token-here"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+#### Security Best Practices
+
+- **Never commit PATs** to version control or configuration files
+- **Use environment variables** for all automated/scripted access
+- **Rotate tokens regularly** and delete old tokens from the Personal access tokens page
+- **Restrict token scope** to the minimum required permissions
+- **Monitor token usage** through the ADO audit logs if available in your organization
+
+---
+
 ## Reference Implementation
 
 See [reference_kpis.py](reference_kpis.py) for the full Python reference script that demonstrates the KPI collection and calculation workflow:
 
-- **Authentication:** PAT via Basic auth
+- **Authentication:** PAT via Basic auth (sourced from `ADO_PAT` environment variable)
 - **Repository Resolution:** Maps repo names to IDs via REST
 - **Data Collection:** Fetches PR list + threads/comments with pagination support
 - **KPI 1 Computation:** Identifies first non-author comment timestamp
 - **KPI 2 Computation:** Calculates PR creation-to-close duration
 - **Statistics:** Computes P50/P75/P90 percentiles per repo and org-wide
 
-**Usage:**
+### Prerequisites
+
+- **Python 3.7+**
+- **requests library:** Install via `pip install requests`
+- **Azure DevOps PAT token:** Store in the `ADO_PAT` environment variable (see [Authentication & Setup](#authentication--setup) above)
+
+### Usage
+
+Ensure your PAT is stored in the `ADO_PAT` environment variable, then run the script:
+
 ```bash
+# The script reads the PAT from the ADO_PAT environment variable automatically
 python reference_kpis.py --org {org} --project {project} --repo-name {repo} --days 30
 ```
 
-**Requirements:**
-- `requests` library: `pip install requests`
-- Azure DevOps PAT token (set via `--pat` or `ADO_PAT` env var)
+**Arguments:**
+- `--org` (required): Azure DevOps organization name
+- `--project` (required): Project name within the organization
+- `--repo-name` (required): Repository name to analyze
+- `--days` (optional): Number of days of historical PR data to analyze (default: 30)
+
+**Example:**
+```bash
+python reference_kpis.py --org myorg --project myproject --repo-name myrepo --days 60
+```
+
+The script will retrieve the PAT from the `ADO_PAT` environment variable and use it to authenticate all API requests. No credentials need to be specified on the command line.
