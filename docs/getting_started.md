@@ -16,13 +16,14 @@ pip install -r requirements.txt
 ## Running the Application
 
 ```bash
-python src/myapp/main.py
+export ADO_PAT="your-pat-token"
+python src/myapp/main.py --org <org> --project <project> --repo-name <repo> --days 30
 ```
 
 ## Running Tests
 
 ```bash
-pytest tests/
+python -m pytest -q
 ```
 
 ## Code Quality

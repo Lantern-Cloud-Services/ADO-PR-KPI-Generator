@@ -1,4 +1,5 @@
-# Core dependencies (none for this simple project, add as needed)
+# Core dependencies
+requests>=2.31.0
 
 # Development dependencies
 pytest>=7.0
