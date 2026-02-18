@@ -107,7 +107,7 @@ source ~/.bashrc
 ### Option A: Run as module
 
 ```bash
-python -m myapp.main --org myorg --project myproject --repo-name myrepo --days 30
+python -m myapp.main --org myorg --project myproject --repo-name myrepo
 ```
 
 ### Option B: Run installed CLI command
@@ -121,7 +121,7 @@ Supported arguments:
 - `--org` (required)
 - `--project` (required)
 - `--repo-name` (required)
-- `--days` (optional, positive integer, default `30`)
+- `--days` (optional, positive integer; omit to query all PRs, provide to query only recent PRs)
 
 Exit codes:
 
@@ -133,21 +133,21 @@ Exit codes:
 
 ## 6) Example Usage Scenarios
 
-### Scenario 1: Baseline last 30 days
+### Scenario 1: Query all PRs (full history)
+
+```bash
+ado-pr-kpi-generator --org contoso --project platform --repo-name api-service
+```
+
+Use this when you want a complete historical baseline across the repository (for example, initial analysis or long-term benchmarking).
+
+### Scenario 2: Query recent PRs (time-bounded window)
 
 ```bash
 ado-pr-kpi-generator --org contoso --project platform --repo-name api-service --days 30
 ```
 
-Use this for regular KPI tracking.
-
-### Scenario 2: Longer trend window (90 days)
-
-```bash
-ado-pr-kpi-generator --org contoso --project platform --repo-name api-service --days 90
-```
-
-Use this for quarterly health reviews.
+Use this when you want a focused view of current performance trends (for example, weekly/monthly KPI reviews or release-cycle monitoring).
 
 ## 7) Troubleshooting
 

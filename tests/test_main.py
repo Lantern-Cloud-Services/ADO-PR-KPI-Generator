@@ -62,6 +62,38 @@ def test_orchestrate_kpi_generation_success(capsys):
     assert "REPORT" in capsys.readouterr().out
 
 
+def test_orchestrate_kpi_generation_with_days_none_fetches_all_prs(capsys):
+    """Verify days=None uses unbounded PR query mode and passes None time filters."""
+    args = Namespace(org="org", project="project", repo_name="repo", days=None)
+    config = Config(
+        organization="org",
+        project="project",
+        repo_name="repo",
+        days=None,
+        pat="secret",
+    )
+    ado_client = Mock()
+    ado_client.resolve_repo_name_to_id.return_value = "repo-id"
+    ado_client.list_pull_requests.return_value = [Mock()]
+
+    with patch("myapp.main.parse_args", return_value=args), patch(
+        "myapp.main.load_config", return_value=config
+    ), patch("myapp.main.AdoClient", return_value=ado_client), patch(
+        "myapp.main.collect_kpi_samples", return_value=([120.0], [600.0])
+    ), patch("myapp.main.generate_report", return_value="REPORT"):
+        exit_code = orchestrate_kpi_generation()
+
+    assert exit_code == 0
+    ado_client.list_pull_requests.assert_called_once_with(
+        repo_id="repo-id",
+        min_time=None,
+        max_time=None,
+    )
+    output = capsys.readouterr().out
+    assert "Fetching all PRs for repository 'repo'..." in output
+    assert "REPORT" in output
+
+
 def test_orchestrate_kpi_generation_missing_pat_returns_auth_error():
     """Verify missing PAT/authentication failures return the authentication exit code."""
     args = Namespace(org="org", project="project", repo_name="repo", days=30)

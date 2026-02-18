@@ -8,6 +8,7 @@ and final report rendering.
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 from .ado_client import AdoClient
 from .cli import parse_args
@@ -25,8 +26,8 @@ def orchestrate_kpi_generation() -> int:
     2. Load configuration and PAT from environment.
     3. Create Azure DevOps API client.
     4. Resolve repository name to repository ID.
-    5. Build UTC time window from ``now - days`` to ``now``.
-    6. Fetch pull requests in the time window.
+    5. Build optional UTC time window from ``now - days`` to ``now``.
+    6. Fetch pull requests for either the configured window or all history.
     7. Compute KPI samples (dwell and completion times).
     8. Generate and print report.
 
@@ -56,14 +57,23 @@ def orchestrate_kpi_generation() -> int:
         print(f"Resolving repository '{app_config.repo_name}'...")
         repo_id = ado_client.resolve_repo_name_to_id(app_config.repo_name)
 
-        window_end = datetime.now(timezone.utc)
-        window_start = window_end - timedelta(days=app_config.days)
+        min_time: Optional[datetime]
+        max_time: Optional[datetime]
+        if app_config.days is None:
+            min_time = None
+            max_time = None
+            print(f"Fetching all PRs for repository '{app_config.repo_name}'...")
+        else:
+            max_time = datetime.now(timezone.utc)
+            min_time = max_time - timedelta(days=app_config.days)
+            print(
+                f"Fetching PRs from last {app_config.days} days for repository '{app_config.repo_name}'..."
+            )
 
-        print("Fetching PRs...")
         pull_requests = ado_client.list_pull_requests(
             repo_id=repo_id,
-            min_time=window_start,
-            max_time=window_end,
+            min_time=min_time,
+            max_time=max_time,
         )
 
         print("Computing KPIs...")

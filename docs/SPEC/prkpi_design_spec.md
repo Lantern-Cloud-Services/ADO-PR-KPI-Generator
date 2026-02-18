@@ -177,18 +177,26 @@ Ensure your PAT is stored in the `ADO_PAT` environment variable, then run the sc
 
 ```bash
 # The script reads the PAT from the ADO_PAT environment variable automatically
+# Time-bounded mode (analyze recent PRs only)
 python reference_kpis.py --org {org} --project {project} --repo-name {repo} --days 30
+
+# All-PRs mode (analyze all PRs regardless of age)
+python reference_kpis.py --org {org} --project {project} --repo-name {repo}
 ```
 
 **Arguments:**
 - `--org` (required): Azure DevOps organization name
 - `--project` (required): Project name within the organization
 - `--repo-name` (required): Repository name to analyze
-- `--days` (optional): Number of days of historical PR data to analyze (default: 30)
+- `--days` (optional): Number of days of historical PR data to analyze. If omitted, analyzes all PRs regardless of age.
 
-**Example:**
+**Examples:**
 ```bash
+# Time-bounded mode
 python reference_kpis.py --org myorg --project myproject --repo-name myrepo --days 60
+
+# All-PRs mode
+python reference_kpis.py --org myorg --project myproject --repo-name myrepo
 ```
 
 The script will retrieve the PAT from the `ADO_PAT` environment variable and use it to authenticate all API requests. No credentials need to be specified on the command line.

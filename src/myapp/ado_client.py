@@ -154,26 +154,32 @@ class AdoClient:
     def list_pull_requests(
         self,
         repo_id: str,
-        min_time: datetime,
-        max_time: datetime,
+        min_time: Optional[datetime],
+        max_time: Optional[datetime],
     ) -> List[PullRequest]:
-        """List pull requests for a repository between ``min_time`` and ``max_time``.
+        """List pull requests for a repository with an optional time window.
 
-        Uses ``status=all`` and offset pagination via ``$top``/``$skip``.
+        Always queries with ``searchCriteria.status=all`` and uses offset pagination
+        via ``$top``/``$skip``. Time bounds are only applied when both ``min_time``
+        and ``max_time`` are provided; when both are ``None`` no time filters are sent.
         """
         pull_requests: List[PullRequest] = []
         skip = 0
 
         while True:
+            params: Dict[str, Any] = {
+                "searchCriteria.status": "all",
+                "$top": self._PULL_REQUEST_PAGE_SIZE,
+                "$skip": skip,
+            }
+
+            if min_time is not None and max_time is not None:
+                params["searchCriteria.minTime"] = self._format_datetime(min_time)
+                params["searchCriteria.maxTime"] = self._format_datetime(max_time)
+
             payload = self._get_json(
                 f"git/repositories/{repo_id}/pullrequests",
-                params={
-                    "searchCriteria.status": "all",
-                    "searchCriteria.minTime": self._format_datetime(min_time),
-                    "searchCriteria.maxTime": self._format_datetime(max_time),
-                    "$top": self._PULL_REQUEST_PAGE_SIZE,
-                    "$skip": skip,
-                },
+                params=params,
             )
 
             page_items = payload.get("value", [])

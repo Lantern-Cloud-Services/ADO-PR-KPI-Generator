@@ -126,3 +126,18 @@ def test_list_pull_requests_uses_pagination_until_final_partial_page():
     assert first_call.kwargs["params"]["$top"] == client._PULL_REQUEST_PAGE_SIZE
     assert second_call.kwargs["params"]["$skip"] == client._PULL_REQUEST_PAGE_SIZE
     assert second_call.kwargs["params"]["$top"] == client._PULL_REQUEST_PAGE_SIZE
+
+
+def test_list_pull_requests_without_time_bounds_omits_min_max_params():
+    """Verify unbounded pull-request listing omits min/max time while keeping status=all."""
+    client = _build_client()
+    client._get_json = Mock(return_value={"value": [_pr_item(1)]})
+
+    prs = client.list_pull_requests(repo_id="repo-id", min_time=None, max_time=None)
+
+    assert len(prs) == 1
+    call = client._get_json.call_args
+    params = call.kwargs["params"]
+    assert params["searchCriteria.status"] == "all"
+    assert "searchCriteria.minTime" not in params
+    assert "searchCriteria.maxTime" not in params

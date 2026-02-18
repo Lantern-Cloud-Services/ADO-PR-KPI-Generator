@@ -60,7 +60,21 @@ python -m myapp.main --org myorg --project myproject --repo-name myrepo --days 3
 Or, after `pip install -e .`, run:
 
 ```bash
-ado-pr-kpi-generator --org myorg --project myproject --repo-name myrepo --days 30
+ado-pr-kpi-generator --org myorg --project myproject --repo-name myrepo
+```
+
+Examples:
+
+1. With `--days` specified (time-bounded):
+
+```bash
+python -m myapp.main --org myorg --project myproject --repo-name myrepo --days 14
+```
+
+2. Without `--days` (all PRs):
+
+```bash
+python -m myapp.main --org myorg --project myproject --repo-name myrepo
 ```
 
 Arguments:
@@ -68,7 +82,7 @@ Arguments:
 - `--org` (required): Azure DevOps organization name
 - `--project` (required): Azure DevOps project name
 - `--repo-name` (required): Repository name to analyze
-- `--days` (optional): Positive integer lookback window, default `30`
+- `--days` (optional): Positive integer lookback window
 
 Exit codes:
 

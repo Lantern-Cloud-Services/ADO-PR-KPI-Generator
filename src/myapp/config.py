@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from typing import Optional
 
 from .errors import AuthenticationError, ConfigurationError
 
@@ -15,27 +16,27 @@ class Config:
     organization: str
     project: str
     repo_name: str
-    days: int
+    days: Optional[int]
     pat: str
 
 
-def load_config(organization: str, project: str, repo_name: str, days: int) -> Config:
+def load_config(organization: str, project: str, repo_name: str, days: Optional[int]) -> Config:
     """Build and validate application configuration.
 
     Args:
         organization: Azure DevOps organization name.
         project: Azure DevOps project name.
         repo_name: Azure DevOps repository name.
-        days: Positive number of days of history to query.
+        days: Positive number of days of history to query, or ``None`` for an unbounded query.
 
     Returns:
         A validated ``Config`` instance.
 
     Raises:
-        ConfigurationError: If ``days`` is not greater than ``0``.
+        ConfigurationError: If ``days`` is provided and is not greater than ``0``.
         AuthenticationError: If ``ADO_PAT`` is not configured.
     """
-    if days <= 0:
+    if days is not None and days <= 0:
         raise ConfigurationError("Invalid value for 'days': expected an integer greater than 0.")
 
     pat: str = os.getenv("ADO_PAT", "").strip()

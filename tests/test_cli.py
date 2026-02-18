@@ -37,8 +37,8 @@ def test_parse_args_with_valid_arguments(monkeypatch):
     assert args.days == 14
 
 
-def test_parse_args_uses_default_days_when_not_specified(monkeypatch):
-    """Verify CLI parsing defaults days to 30 when --days is omitted."""
+def test_parse_args_without_days(monkeypatch):
+    """Verify CLI parsing sets days to None when --days is omitted."""
     monkeypatch.setattr(
         sys,
         "argv",
@@ -50,6 +50,29 @@ def test_parse_args_uses_default_days_when_not_specified(monkeypatch):
             "my-project",
             "--repo-name",
             "my-repo",
+        ],
+    )
+
+    args = parse_args()
+
+    assert args.days is None
+
+
+def test_parse_args_with_explicit_days_30(monkeypatch):
+    """Verify CLI parsing keeps backwards compatibility for --days 30."""
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "ado-pr-kpi-generator",
+            "--org",
+            "my-org",
+            "--project",
+            "my-project",
+            "--repo-name",
+            "my-repo",
+            "--days",
+            "30",
         ],
     )
 

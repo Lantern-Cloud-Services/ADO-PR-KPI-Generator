@@ -1,7 +1,5 @@
 """Command-line argument parsing for the ADO PR KPI Generator."""
 
-from __future__ import annotations
-
 import argparse
 
 
@@ -33,7 +31,7 @@ def parse_args() -> argparse.Namespace:
 
     Returns:
         Parsed CLI arguments containing organization, project, repository name,
-        and days of history to query.
+        and optional days of history to query.
     """
     parser = argparse.ArgumentParser(
         prog="ado-pr-kpi-generator",
@@ -60,9 +58,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--days",
+        nargs="?",
         type=_positive_int,
-        default=30,
-        help="Number of days of PR history to analyze (default: 30).",
+        help=(
+            "Number of days of historical data to analyze. If omitted, "
+            "analyzes all PRs regardless of age."
+        ),
     )
 
     return parser.parse_args()
