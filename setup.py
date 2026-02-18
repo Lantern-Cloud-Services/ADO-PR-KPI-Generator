@@ -5,13 +5,15 @@ from setuptools import setup, find_packages
 setup(
     name="myapp",
     version="0.1.0",
-    description="Simple Python application",
+    description="Azure DevOps PR KPI generator example",
     author="Your Name",
     author_email="your.email@example.com",
     python_requires=">=3.8",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
-    install_requires=[],
+    install_requires=[
+        "requests>=2.31.0",
+    ],
     extras_require={
         "dev": [
             "pytest>=7.0",

@@ -1,3 +1,94 @@
-# Ultralight-Orchestrator-bootstrap
+# ADO PR KPI Generator
 
-Bootstrap project for the testing / demonstration of the Ultralight Orchestration workflow - https://gist.github.com/burkeholland/0e68481f96e94bbb98134fa6efd00436
+Simple Python script for collecting pull request flow KPIs from Azure DevOps using REST APIs.
+
+The script calculates:
+- PR Review Dwell Time (first non-author response)
+- PR Completion Time (creation to completion)
+
+For both metrics it reports:
+- P50 (median)
+- P75
+- P90
+
+## How It Works
+
+The script queries Azure DevOps pull requests and PR thread comments, then aggregates timing metrics per repo and across all processed repos.
+
+Repository targets can be provided by:
+- `--repo-id` (repeatable)
+- `--repo-name` (repeatable)
+
+If no repos are provided, the script processes all repositories in the project.
+
+## Prerequisites
+
+- Python 3.8+
+- Azure DevOps Personal Access Token (PAT) with `Code (Read)` scope
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Set PAT in your environment:
+
+```bash
+export ADO_PAT="<your-pat>"
+```
+
+## Usage
+
+Run as a module:
+
+```bash
+python -m myapp.main --org <org> --project <project> --repo-name <repo>
+```
+
+Or run the script directly:
+
+```bash
+python src/myapp/main.py --org <org> --project <project> --repo-name <repo>
+```
+
+### Common Examples
+
+Time-boxed window (last 30 days):
+
+```bash
+python -m myapp.main --org <org> --project <project> --repo-name <repo> --days 30
+```
+
+All available PR data (omit `--days`):
+
+```bash
+python -m myapp.main --org <org> --project <project> --repo-name <repo>
+```
+
+Multiple repositories by name:
+
+```bash
+python -m myapp.main --org <org> --project <project> --repo-name repo-a --repo-name repo-b
+```
+
+Repository IDs instead of names:
+
+```bash
+python -m myapp.main --org <org> --project <project> --repo-id <repo-id-1> --repo-id <repo-id-2>
+```
+
+## CLI Arguments
+
+- `--org` (required): Azure DevOps organization name
+- `--project` (required): Azure DevOps project name
+- `--repo-id` (optional, repeatable): repository ID
+- `--repo-name` (optional, repeatable): repository name
+- `--include-hidden` (optional): include hidden repos in name resolution
+- `--pat` (optional): PAT value (otherwise read from `ADO_PAT`)
+- `--days` (optional): lookback window in days; omit to query all available PRs
+
+## Notes
+
+- The script uses Azure DevOps REST API version `7.1` / `7.1-preview.1` endpoints.
+- Large projects may take longer because each PR can require additional thread/comment API calls.
