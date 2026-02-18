@@ -92,3 +92,23 @@ python -m myapp.main --org <org> --project <project> --repo-id <repo-id-1> --rep
 
 - The script uses Azure DevOps REST API version `7.1` / `7.1-preview.1` endpoints.
 - Large projects may take longer because each PR can require additional thread/comment API calls.
+
+## Example Output
+
+```text
+=== Repo: AAAP_Code (2d80722b-1381-4325-9e61-fdfbe7041d45) ===
+PR Review Dwell Time (First Response) | count=98 | P50=00:00:33 | P75=00:02:41 | P90=00:04:23
+PR Completion Time | count=79 | P50=08:39:26 | P75=20:32:44 | P90=115:23:49
+
+=== SUMMARY (across processed repos) ===
+PR Review Dwell Time (First Response) | count=98 | P50=00:00:33 | P75=00:02:41 | P90=00:04:23
+PR Completion Time | count=79 | P50=08:39:26 | P75=20:32:44 | P90=115:23:49
+```
+
+In this output:
+- `P50` = 50th percentile (median)
+- `P75` = 75th percentile
+- `P90` = 90th percentile
+
+Example interpretation:
+- For `PR Completion Time`, `P50=08:39:26` means half of completed PRs finished in 8 hours, 39 minutes, and 26 seconds or less.

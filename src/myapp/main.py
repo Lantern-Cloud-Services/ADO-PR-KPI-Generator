@@ -288,6 +288,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         min_time = max_time - dt.timedelta(days=args.days)
     client = AdoClient(org=args.org, project=args.project, pat=args.pat)
 
+    repositories = client.list_repositories(include_hidden=args.include_hidden)
+    repo_name_by_id = {
+        repo["id"]: repo["name"]
+        for repo in repositories
+        if repo.get("id") and repo.get("name")
+    }
+
     resolved_repo_ids: Dict[str, str] = {}
     if args.repo_name:
         resolved_repo_ids = client.resolve_repo_names_to_ids(args.repo_name, include_hidden=args.include_hidden)
@@ -301,7 +308,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     repo_ids.update(resolved_repo_ids.values())
 
     if not repo_ids:
-        repositories = client.list_repositories(include_hidden=args.include_hidden)
         repo_ids = {repo["id"] for repo in repositories if repo.get("id")}
         print(f"No repos specified; processing all repos in project (count={len(repo_ids)}).")
 
@@ -309,7 +315,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     all_completion: List[float] = []
 
     for repo_id in sorted(repo_ids):
-        print(f"\n=== Repo: {repo_id} ===")
+        repo_name = repo_name_by_id.get(repo_id, "unknown")
+        print(f"\n=== Repo: {repo_name} ({repo_id}) ===")
         dwell_seconds, completion_seconds = compute_repo_kpis(client, repo_id, min_time, max_time)
         all_dwell.extend(dwell_seconds)
         all_completion.extend(completion_seconds)
