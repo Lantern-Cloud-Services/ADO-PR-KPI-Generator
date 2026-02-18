@@ -1,3 +1,4 @@
-"""Ultralight Orchestrator Bootstrap - Simple Python Application"""
-
+"""ADO PR KPI Generator package."""
 __version__ = "0.1.0"
+
+__all__ = ["__version__"]
